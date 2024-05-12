@@ -24,11 +24,16 @@
 
 package de.heaal.eaf.testbench;
 
+import de.heaal.eaf.algorithm.GeneticAlgorithm;
 import de.heaal.eaf.algorithm.HillClimbingAlgorithm;
-import de.heaal.eaf.evaluation.ComparatorIndividual;
 import de.heaal.eaf.base.Individual;
+import de.heaal.eaf.crossover.SinglePointCrossover;
+import de.heaal.eaf.evaluation.ComparatorIndividual;
 import de.heaal.eaf.evaluation.MinimizeFunctionComparator;
 import de.heaal.eaf.mutation.RandomMutation;
+import de.heaal.eaf.testbench.TestFunctions;
+
+import java.util.Random;
 import java.util.function.Function;
 
 /**
@@ -36,7 +41,7 @@ import java.util.function.Function;
  * 
  * @author Christian Lins <christian.lins@haw-hamburg.de>
  */
-public class TestHillClimbing {
+public class TestGenetic {
     public static void main(String[] args) {
         float[] min = {-5.12f, -5.12f};
         float[] max = {+5.12f, +5.12f};
@@ -44,9 +49,11 @@ public class TestHillClimbing {
         TestFunctions test = new TestFunctions();
 
         var comparator = new MinimizeFunctionComparator(test.evalAckleyFunc2D);
+        var combination = new SinglePointCrossover();
+        combination.setRandom(new Random());
 
-        var algo = new HillClimbingAlgorithm(min, max,
-                comparator, new RandomMutation(min, max), new ComparatorIndividual(0.001f));
+        var algo = new GeneticAlgorithm(min, max,
+                comparator, new RandomMutation(min, max), 10, combination,new ComparatorIndividual(0.001f));
         algo.run();
     }
 }

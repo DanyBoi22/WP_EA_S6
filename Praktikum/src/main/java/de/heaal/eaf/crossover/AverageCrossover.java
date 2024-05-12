@@ -22,31 +22,32 @@
  * SOFTWARE.
  */
 
-package de.heaal.eaf.testbench;
+package de.heaal.eaf.crossover;
 
-import de.heaal.eaf.algorithm.HillClimbingAlgorithm;
-import de.heaal.eaf.evaluation.ComparatorIndividual;
 import de.heaal.eaf.base.Individual;
-import de.heaal.eaf.evaluation.MinimizeFunctionComparator;
-import de.heaal.eaf.mutation.RandomMutation;
-import java.util.function.Function;
 
-/**
- * Test bench for the Hill Climbing algorithm.
- * 
- * @author Christian Lins <christian.lins@haw-hamburg.de>
- */
-public class TestHillClimbing {
-    public static void main(String[] args) {
-        float[] min = {-5.12f, -5.12f};
-        float[] max = {+5.12f, +5.12f};
+import java.util.Random;
 
-        TestFunctions test = new TestFunctions();
+public class AverageCrossover implements Combination {
 
-        var comparator = new MinimizeFunctionComparator(test.evalAckleyFunc2D);
-
-        var algo = new HillClimbingAlgorithm(min, max,
-                comparator, new RandomMutation(min, max), new ComparatorIndividual(0.001f));
-        algo.run();
+    protected Random rng;
+    
+    @Override
+    public void setRandom(Random rng) {
+        this.rng = rng;
     }
+
+    @Override
+    public Individual combine(Individual[] parents) {
+        int dim = parents[0].getGenome().len();
+        
+        Individual child = parents[0].copy();
+
+        for(int i = 0; i < dim; i++){
+            child.getGenome().array()[i] = (parents[0].getGenome().array()[i] + parents[1].getGenome().array()[i])/2;
+        }
+        
+        return child;
+    }
+    
 }
