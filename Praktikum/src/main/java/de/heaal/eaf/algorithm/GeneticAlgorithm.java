@@ -70,11 +70,7 @@ public class GeneticAlgorithm extends Algorithm {
 
         //Step 1 calculate the fitness of each Parent in the Population
         //and sort the Population descending
-        Function<Individual, Float> FitnessFunction = (x) -> {
-                float x1 = x.getGenome().array()[0] < 0 ? -x.getGenome().array()[0] : x.getGenome().array()[0];
-                float x2 = x.getGenome().array()[1] < 0 ? -x.getGenome().array()[1] : x.getGenome().array()[1];
-                return x1 + x2;};
-
+        //ToDo: The sorting is in wrong order, gotta fix it
         Comparator<Individual> cmp = new MinimizeFunctionComparator(FitnessFunction);
 
         population.sort(cmp);
@@ -83,7 +79,7 @@ public class GeneticAlgorithm extends Algorithm {
         List<Individual> children = new ArrayList<>();
 
         while(children.size() != population.size()) {
-            //Step 2 select a pair of parents
+            //Step 2 select a pair of different parents
             Individual[] parents = new Individual[2];
             parents[0] = selectNormal(population, new Random(), null);
             parents[1] = selectNormal(population, new Random(), parents[0]);
@@ -107,13 +103,17 @@ public class GeneticAlgorithm extends Algorithm {
             population.set(i, children.get(i));
         }
     }
+
+    public Function<Individual, Float> FitnessFunction = (x) -> {
+        float x1 = x.getGenome().array()[0] < 0 ? -x.getGenome().array()[0] : x.getGenome().array()[0];
+        float x2 = x.getGenome().array()[1] < 0 ? -x.getGenome().array()[1] : x.getGenome().array()[1];
+        return x1 + x2;};
   
     @Override
     public boolean isTerminationCondition() {
         boolean termination = false;
 
         for(int i = 0; i < population.size(); i++) {
-
             if (comparator.compare(population.get(i), terminationCriterion) > 0)
                 termination = true;
         }
