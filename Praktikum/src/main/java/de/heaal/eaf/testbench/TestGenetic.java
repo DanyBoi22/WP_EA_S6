@@ -25,17 +25,10 @@
 package de.heaal.eaf.testbench;
 
 import de.heaal.eaf.algorithm.GeneticAlgorithm;
-import de.heaal.eaf.algorithm.HillClimbingAlgorithm;
-import de.heaal.eaf.base.Individual;
 import de.heaal.eaf.crossover.AverageCrossover;
-import de.heaal.eaf.crossover.SinglePointCrossover;
 import de.heaal.eaf.evaluation.ComparatorIndividual;
 import de.heaal.eaf.evaluation.MinimizeFunctionComparator;
 import de.heaal.eaf.mutation.RandomMutation;
-import de.heaal.eaf.testbench.TestFunctions;
-
-import java.util.Random;
-import java.util.function.Function;
 
 /**
  * Test bench for the Hill Climbing algorithm.
@@ -56,8 +49,8 @@ public class TestGenetic {
         combination.setRandom(new Random());
         */
 
-        var algo = new GeneticAlgorithm(min, max,
-                comparator, new RandomMutation(min, max), 40, combination,new ComparatorIndividual(0.001f));
+        var algo = new GeneticAlgorithm(min, max, 40, combination, true,
+                comparator, new RandomMutation(min, max), new ComparatorIndividual(0.001f));
         algo.run();
     }
 }
