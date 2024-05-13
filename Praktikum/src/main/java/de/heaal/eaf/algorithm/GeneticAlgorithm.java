@@ -27,6 +27,7 @@ package de.heaal.eaf.algorithm;
 import de.heaal.eaf.base.Algorithm;
 import de.heaal.eaf.base.Individual;
 import de.heaal.eaf.base.IndividualFactory;
+import de.heaal.eaf.base.VecN;
 import de.heaal.eaf.crossover.Combination;
 import de.heaal.eaf.evaluation.ComparatorIndividual;
 import de.heaal.eaf.evaluation.MinimizeFunctionComparator;
@@ -69,8 +70,7 @@ public class GeneticAlgorithm extends Algorithm {
         super.nextGeneration();
 
         //Step 1 calculate the fitness of each Parent in the Population
-        //and sort the Population descending
-        //ToDo: The sorting is in wrong order, gotta fix it
+        //and sort the Population in descending order
         Comparator<Individual> cmp = new MinimizeFunctionComparator(FitnessFunction);
 
         population.sort(cmp);
@@ -90,6 +90,7 @@ public class GeneticAlgorithm extends Algorithm {
         //Loop
 
         //Step 4 randomly mutate kids
+        //Only one feature is allowed to mutate
         MutationOptions opt = new MutationOptions();
         opt.put(MutationOptions.KEYS.MUTATION_PROBABILITY, 0.1f);
 
@@ -104,6 +105,14 @@ public class GeneticAlgorithm extends Algorithm {
         }
     }
 
+    /**
+     * Fitness Function.
+     * If we are trying to maximize f(x), then we calculate the fitness of each xi
+     * by computing f(xi). -> |x| + |y|
+     * If we are trying to minimize f(x), then we calculate the fitness of each xi
+     * by computing the negative of f(xi). -> -|x| - |y|; alternatively 1/|x| + 1/|x| (watch out for zero division)
+     * But because we are using minimising Comparator to sort the population we need to maximize the fitness
+     */
     public Function<Individual, Float> FitnessFunction = (x) -> {
         float x1 = x.getGenome().array()[0] < 0 ? -x.getGenome().array()[0] : x.getGenome().array()[0];
         float x2 = x.getGenome().array()[1] < 0 ? -x.getGenome().array()[1] : x.getGenome().array()[1];
@@ -127,20 +136,34 @@ public class GeneticAlgorithm extends Algorithm {
         int count = 0;
         while(!isTerminationCondition()) {
             System.out.println("Gen: " + count);
-            /*
+             /*
             for(int i = 0; i < population.size(); i++) {
                 System.out.println("Genome " + i + ": " + population.get(i).getGenome());
                 System.out.println("Cache: " + population.get(i).getCache());
             }
-            */
+             */
             nextGeneration();
             count++;
         }
 
+        /* print the entire population
         for(int i = 0; i < population.size(); i++) {
             System.out.println("Genome " + i + ": " + population.get(i).getGenome());
             System.out.println("Cache: " + population.get(i).getCache());
         }
+        */
+        VecN TerminationGenome = null;
+        float TerminationCache = 0.0f;
+
+        for(int i = 0; i < population.size(); i++) {
+            if (comparator.compare(population.get(i), terminationCriterion) > 0) {
+                TerminationGenome = population.get(i).getGenome();
+                TerminationCache = population.get(i).getCache();
+                break;
+            }
+        }
+        System.out.println("Termination Genome: " + TerminationGenome);
+        System.out.println("Cache: " + TerminationCache);
 
     }
 

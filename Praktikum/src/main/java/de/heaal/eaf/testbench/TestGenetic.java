@@ -27,6 +27,7 @@ package de.heaal.eaf.testbench;
 import de.heaal.eaf.algorithm.GeneticAlgorithm;
 import de.heaal.eaf.algorithm.HillClimbingAlgorithm;
 import de.heaal.eaf.base.Individual;
+import de.heaal.eaf.crossover.AverageCrossover;
 import de.heaal.eaf.crossover.SinglePointCrossover;
 import de.heaal.eaf.evaluation.ComparatorIndividual;
 import de.heaal.eaf.evaluation.MinimizeFunctionComparator;
@@ -49,11 +50,14 @@ public class TestGenetic {
         TestFunctions test = new TestFunctions();
 
         var comparator = new MinimizeFunctionComparator(test.evalAckleyFunc2D);
+        var combination = new AverageCrossover();
+        /*
         var combination = new SinglePointCrossover();
         combination.setRandom(new Random());
+        */
 
         var algo = new GeneticAlgorithm(min, max,
-                comparator, new RandomMutation(min, max), 10, combination,new ComparatorIndividual(0.001f));
+                comparator, new RandomMutation(min, max), 40, combination,new ComparatorIndividual(0.001f));
         algo.run();
     }
 }
