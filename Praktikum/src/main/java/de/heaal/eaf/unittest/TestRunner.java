@@ -1,4 +1,4 @@
-package de.heaal.eaf.testbench;
+package de.heaal.eaf.unittest;
 import org.junit.runner.JUnitCore;
 
 public class TestRunner {

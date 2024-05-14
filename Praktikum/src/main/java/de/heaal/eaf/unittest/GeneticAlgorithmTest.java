@@ -1,4 +1,4 @@
-package de.heaal.eaf.testbench;
+package de.heaal.eaf.unittest;
 
 import de.heaal.eaf.algorithm.Particle;
 import de.heaal.eaf.base.Individual;
@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.function.Function;
 
 import static de.heaal.eaf.algorithm.GeneticAlgorithm.*;
 import static org.junit.Assert.*;
@@ -57,7 +56,10 @@ public class GeneticAlgorithmTest {
         assertEquals(0.0f, res4, 0.0001f);
     }
 
-
+    /**
+     * Test for ensuring that fitness function and sorting of the population work together as intended.
+     * After the sorting the population has to be sorted descending from most to less fit Individual
+     */
     @Test
     public void testPopulationSort() {
         Comparator<Individual> cmp = new MinimizeFunctionComparator(FitnessPosCoordinates);
@@ -88,6 +90,10 @@ public class GeneticAlgorithmTest {
         assertEquals(popExpected.get(3), pop.get(3));
     }
 
+    /**
+     * Test of the average crossover.
+     * The child of 2 parental Individuals becomes average values for each allele from both parents
+     */
     @Test
     public void testAverageCrossover() {
         Combination comb = new AverageCrossover();

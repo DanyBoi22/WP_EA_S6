@@ -24,9 +24,9 @@ public class TestFunctions {
                 double sum1 = 0;
                 double sum2 = 0;
 
-                for (int i = 0; i < x.length; i++) {
-                    sum1 += x[i]*x[i];
-                    sum2 += Math.cos(2*Math.PI*x[i]);
+                for (float v : x) {
+                    sum1 += v * v;
+                    sum2 += Math.cos(2 * Math.PI * v);
                 }
 
                 var term1 = -20*Math.exp(-0.2*Math.sqrt(sum1/n));

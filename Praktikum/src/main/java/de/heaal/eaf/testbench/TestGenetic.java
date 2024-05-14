@@ -29,6 +29,9 @@ import de.heaal.eaf.crossover.AverageCrossover;
 import de.heaal.eaf.evaluation.ComparatorIndividual;
 import de.heaal.eaf.evaluation.MinimizeFunctionComparator;
 import de.heaal.eaf.mutation.RandomMutation;
+import de.heaal.eaf.crossover.SinglePointCrossover;
+
+import java.util.Random;
 
 /**
  * Test bench for the Hill Climbing algorithm.
@@ -43,11 +46,12 @@ public class TestGenetic {
         TestFunctions test = new TestFunctions();
 
         var comparator = new MinimizeFunctionComparator(test.evalAckleyFunc2D);
+
         var combination = new AverageCrossover();
-        /*
-        var combination = new SinglePointCrossover();
-        combination.setRandom(new Random());
-        */
+
+        // Random crossover point is bs
+        // var combination = new SinglePointCrossover();
+        // combination.setRandom(new Random());
 
         var algo = new GeneticAlgorithm(min, max, 40, combination, true,
                 comparator, new RandomMutation(min, max), new ComparatorIndividual(0.001f));

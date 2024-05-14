@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 
+import static de.heaal.eaf.logger.Logger.createLogFile;
+import static de.heaal.eaf.logger.Logger.logLineToCSV;
 import static de.heaal.eaf.selection.SelectionUtils.selectNormal;
 
 /**
@@ -53,6 +55,8 @@ public class GeneticAlgorithm extends Algorithm {
     private final float mutationRate;
     private final boolean useElitism;
     private final int numberElitism;
+    private final Function<Individual,Float> fitnessFunction;
+    private final String logFile;
 
 
     public GeneticAlgorithm(float[] min, float[] max, int populationSize,
@@ -63,10 +67,24 @@ public class GeneticAlgorithm extends Algorithm {
         this.indFac = new ParticleFactory(min, max);
         this.terminationCriterion = terminationCriterion;
         this.combination = combination;
+        if(populationSize <= 1) {
+            throw new IllegalArgumentException("Population size must be greater than 1");
+        }
         this.populationSize = populationSize;
         this.useElitism = useElitism;
+
+        // Better to be small: [0.05; 0.3], otherwise the algo degenerates to just random search
         this.mutationRate = 0.1f;
+        // Better to be small: 1-2
         this.numberElitism = 1;
+        // Well... fitness function
+        this.fitnessFunction = FitnessPosCoordinates;
+
+        // Create the log file
+        this.logFile = createLogFile("data/ge.csv");
+        if(logFile == null){
+            throw new NullPointerException("log file is null");
+        }
     }
     
     @Override
@@ -75,9 +93,12 @@ public class GeneticAlgorithm extends Algorithm {
 
         // Step 1 calculate the fitness of each Parent in the Population
         // and sort the Population in descending order
-        Comparator<Individual> cmp = new MinimizeFunctionComparator(FitnessPosCoordinates);
-
+        // ToDo: whats correct for FitnessFunction: to use cache or genome or smth else?
+        Comparator<Individual> cmp = new MinimizeFunctionComparator(fitnessFunction);
         population.sort(cmp);
+
+        // Log the fittnes of the population
+        logData(logFile);
 
         // While |Children| < |Parents|
         List<Individual> children = new ArrayList<>();
@@ -96,7 +117,7 @@ public class GeneticAlgorithm extends Algorithm {
         // Step 4 randomly mutate kids
         // Only one feature is allowed to mutate
         MutationOptions opt = new MutationOptions();
-        opt.put(MutationOptions.KEYS.MUTATION_PROBABILITY, this.mutationRate);
+        opt.put(MutationOptions.KEYS.MUTATION_PROBABILITY, mutationRate);
 
         Individual ind;
         for(int i = 0; i < population.size(); i++) {
@@ -107,13 +128,25 @@ public class GeneticAlgorithm extends Algorithm {
         // Step 5 set the children as the new population and exterminate the parents
 
         // Step 5.1 Preserve Elite if useElitism is True
-        // Because the parents list is already sorted all we need to do is choose the first best Individuals
-        // ToDo: Testing ()
-        int startpoint = this.useElitism ? this.numberElitism : 0;
+        // Because the parents list is already sorted, all we need to do is choose the first best Individuals
+        int startpoint = useElitism ? numberElitism : 0;
 
         for(int i = startpoint; i < population.size(); i++) {
             population.set(i, children.get(i));
         }
+    }
+
+    /**
+     * Iterates trough population and writes fitness of each individual to the log file
+     *
+     * @param logFile
+     */
+    public void logData(String logFile) {
+        Float[] data = new Float[population.size()];
+        for(int i = 0; i < population.size(); i++) {
+            data[i] = fitnessFunction.apply(population.get(i));
+        }
+        logLineToCSV(data,logFile);
     }
 
     /**
@@ -122,7 +155,7 @@ public class GeneticAlgorithm extends Algorithm {
      * by computing f(xi). -> |x| + |y|
      * If we are trying to minimize f(x), then we calculate the fitness of each xi
      * by computing the negative of f(xi). -> -|x| - |y|; alternatively 1/|x| + 1/|x| (watch out for zero division)
-     * But because we are using minimising Comparator to sort the population we need to maximize the fitness
+     * But because we are using minimising Comparator to sort the population we need to solve a maximization problem
      */
     public static Function<Individual, Float> FitnessPosCoordinates = (x) -> {
         float x1 = x.getGenome().array()[0] < 0 ? -x.getGenome().array()[0] : x.getGenome().array()[0];
@@ -160,24 +193,11 @@ public class GeneticAlgorithm extends Algorithm {
             count++;
         }
 
-        /* print the entire population
-        for(int i = 0; i < population.size(); i++) {
-            System.out.println("Genome " + i + ": " + population.get(i).getGenome());
-            System.out.println("Cache: " + population.get(i).getCache());
-        }
-        */
-        VecN TerminationGenome = null;
-        float TerminationCache = -0.0f;
+        Comparator<Individual> cmp = new MinimizeFunctionComparator(FitnessPosCoordinates);
+        population.sort(cmp);
 
-        for(int i = 0; i < population.size(); i++) {
-            if (comparator.compare(population.get(i), terminationCriterion) > 0) {
-                TerminationGenome = population.get(i).getGenome();
-                TerminationCache = population.get(i).getCache();
-                break;
-            }
-        }
-        System.out.println("Termination Genome: " + TerminationGenome);
-        System.out.println("Cache: " + TerminationCache);
+        System.out.println("Best Genome: " + population.get(0).getGenome());
+        System.out.println("Cache: " + population.get(0).getCache());
 
     }
 
